@@ -1,6 +1,8 @@
-import os
+# The code is well-structured with extensive logging 
+# and error handling, making it excellent for 
+# learning neural network fundamentals with TensorFlow/Keras.
+
 import tensorflow as tf
-# Use the standard Keras imports instead of tensorflow.python.keras
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Flatten
 import numpy as np
@@ -13,7 +15,7 @@ def build_model_sequential(input_shape, num_classes):
     model.add(Dropout(0.2))
     model.add(Dense(num_classes, activation='softmax'))
     
-    model.compile(optimizer='adam',
+    model.compile(optimizer='nadam',    # adam
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
     return model
@@ -102,11 +104,11 @@ def visualize_predictions(test_data, indices, predicted_classes, predictions):
         plt.axis('off')
     
     plt.tight_layout()
-    plt.savefig('src/predictions.png', dpi=150, bbox_inches='tight')
+    plt.savefig('src/tensorflow-sequential/predictions.png', dpi=150, bbox_inches='tight')
     plt.show()
-    print("💾 Saved predictions visualization to src/predictions.png")
+    print("💾 Saved predictions visualization to src/tensorflow-sequential/predictions.png")
 
-def save_model(model, filename='src/trained_model.keras'):
+def save_model(model, filename='src/tensorflow-sequential/trained_model.keras'):
     """Save the trained model in modern Keras format"""
     model.save(filename)
     print(f"💾 Model saved to {filename}")
@@ -134,11 +136,11 @@ def plot_training_history(history):
     ax2.grid(True)
     
     plt.tight_layout()
-    plt.savefig('src/training_history.png', dpi=150, bbox_inches='tight')
+    plt.savefig('src/tensorflow-sequential/training_history.png', dpi=150, bbox_inches='tight')
     plt.show()
-    print("💾 Saved training history to src/training_history.png")
+    print("💾 Saved training history to src/tensorflow-sequential/training_history.png")
 
-def load_saved_model(filename='src/trained_model.keras'):
+def load_saved_model(filename='src/tensorflow-sequential/trained_model.keras'):
     """Load a saved model for inference"""
     try:
         model = tf.keras.models.load_model(filename)
@@ -183,9 +185,9 @@ def test_custom_prediction(model, custom_image=None):
     plt.xticks(range(10))
     
     plt.tight_layout()
-    plt.savefig('src/custom_prediction.png', dpi=150, bbox_inches='tight')
+    plt.savefig('src/tensorflow-sequential/custom_prediction.png', dpi=150, bbox_inches='tight')
     plt.show()
-    print("💾 Saved custom prediction to src/custom_prediction.png")
+    print("💾 Saved custom prediction to src/tensorflow-sequential/custom_prediction.png")
 
 if __name__ == "__main__":
     print("🎯 Building and Training a Neural Network for Handwritten Digit Recognition")
