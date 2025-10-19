@@ -1,5 +1,6 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.utils.class_weight import compute_class_weight
 from sklearn.preprocessing import LabelEncoder
 import tensorflow as tf
 from tensorflow.keras.preprocessing.text import Tokenizer
@@ -34,6 +35,14 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=df['label']
 )
 
+# Class Weights
+class_weights = compute_class_weight(
+    class_weight='balanced',
+    classes=np.unique(y_train),
+    y=y_train
+)
+class_weights = dict(enumerate(class_weights))
+
 # Tokenization & padding
 MAX_VOCAB = 20000
 MAX_LEN = 200
@@ -49,15 +58,27 @@ model = tf.keras.Sequential([
     tf.keras.layers.Embedding(MAX_VOCAB, EMBED_DIM),
     tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64, return_sequences=True)),
     tf.keras.layers.GlobalMaxPooling1D(),
-    tf.keras.layers.Dense(64, activation='relu'),
-    tf.keras.layers.Dropout(0.3),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Dense(num_classes, activation='softmax')
 ])
 model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.summary()
 
 # Train
-history = model.fit(X_train_pad, y_train, validation_split=0.2, epochs=2, batch_size=32)
+early_stop = tf.keras.callbacks.EarlyStopping(
+    monitor='val_loss', 
+    patience=3, 
+    restore_best_weights=True
+)
+history = model.fit(
+    X_train_pad, y_train,
+    validation_split=0.2,
+    epochs=10,
+    batch_size=32,
+    class_weight=class_weights,
+    callbacks=[early_stop]
+)
 
 # Evaluate
 loss, acc = model.evaluate(X_test_pad, y_test, verbose=0)
