@@ -7,12 +7,23 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.utils.class_weight import compute_class_weight
+from tensorflow.keras.preprocessing.text import Tokenizer
 
 # Pull Data & Display Head
 df = pd.read_csv("./netflix_titles.csv")
 print(df.head(5))
 
-df['text'] = df['type'].fillna("") + df['title'].fillna("") + df['cast'].fillna("")
+# Features - show_id,type,title,director,cast,country,date_added,release_year,rating,duration,listed_in,description
+# df['text'] = df['type'].fillna("") + ' ' + df['title'].fillna("") + ' ' + df['cast'].fillna("")
+# df['features'] = df['director'].fillna("") + ' ' + df['cast'].fillna("")
+df['features'] = (
+    df['director'].fillna('') + ' ' +
+    df['cast'].fillna('') + ' ' +
+    df['listed_in'].fillna('') + ' ' +
+    df['type'].fillna('') + ' ' +
+    df['title'].fillna('') + ' ' +
+    df['description'].fillna('')
+)
 
 # Drop Rows with out 'release_year' value
 df = df.dropna(subset='release_year')
@@ -29,7 +40,7 @@ print("Classes:", label_encoder.classes_)
 
 # Create Test/Train Data Sets
 X_train, X_test, y_train, y_test = train_test_split(
-  df['text'], df['label'],
+  df['features'], df['label'],
   test_size=0.2,
   random_state=42,
   stratify=df['label']
@@ -46,7 +57,7 @@ class_weights = dict(enumerate(class_weights))
 # Tokenization (required for Neural Networks)
 MAX_VOCAB = 20000   # 20,000 more frequent words
 MAX_LEN = 200       # 200 tokens is expexted length (required)
-tokenizer = tf.keras.preprocessing.text(num_words=MAX_VOCAB, oov_token="<OOV>")
+tokenizer = Tokenizer(num_words=MAX_VOCAB, oov_token="<OOV>")
 tokenizer.fit_on_texts(X_train)
 
 # Padding (required for Neural Networks)
@@ -65,9 +76,15 @@ model = tf.keras.Sequential([
     tf.keras.layers.GlobalMaxPooling1D(),
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dropout(0.5),
-    tf.keras.layers.Dense(num_classes, activation='softmax')
+    # Clasification Model
+    # tf.keras.layers.Dense(num_classes, activation='softmax')
+    # Regresion Model
+    tf.keras.layers.Dense(1)
 ])
-model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# Clasification Model
+# model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+# Regresion Model
+model.compile(loss='mse', optimizer='adam', metrics=['mae'])
 model.summary()
 
 # Train

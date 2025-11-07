@@ -1,0 +1,14 @@
+{
+  "question_types": [
+    "count",
+    "list",
+    "find",
+    "detail",
+    "genre",
+    "year",
+    "country",
+    "rating"
+  ],
+  "vocab_size_q": 500,
+  "vocab_size_c": 500
+}
